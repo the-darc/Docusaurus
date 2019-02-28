@@ -223,6 +223,7 @@ class HeaderNav extends React.Component {
         docItemActive ||
         (link.blog && this.props.current.blogListing) ||
         (link.page && link.page === this.props.current.id),
+      hiddenItem: !!link.hidden
     });
     const i18n = translation[this.props.language];
     return (
