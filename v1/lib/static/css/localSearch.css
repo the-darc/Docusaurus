@@ -1,0 +1,67 @@
+li.localSearch * { box-sizing: border-box; }
+li.localSearch body {
+  font: 16px Arial; 
+}
+li.localSearch .autocomplete {
+  /*the container must be positioned relative:*/
+  position: relative;
+  display: inline-block;
+}
+li.localSearch .autocomplete-items {
+  overflow-y: auto;
+  max-height: 70vh;
+  width: 350px;
+  left: auto;
+  margin-left: 10px;
+  font-size: 0.9em;
+  text-align: left;
+  color: #444;
+  position: absolute;
+  border-top: 1px solid #d4d4d4;
+  z-index: 99;
+  /*position the autocomplete items to be the same width as the container:*/
+  top: 100%;
+  right: 0;
+}
+li.localSearch .autocomplete-items div {
+  white-space: pre-wrap;
+  padding: 0px;
+  cursor: pointer;
+  background-color: #fff; 
+  border-bottom: 1px solid #d4d4d4; 
+}
+
+li.localSearch .autocomplete-items div:hover,
+li.localSearch .autocomplete-items div.autocomplete-active {
+  /*when hovering an item:*/
+  background-color: #e9e9e9;
+}
+
+li.localSearch .autocomplete-items div:hover span.item-name,
+li.localSearch .autocomplete-items div.autocomplete-active span.item-name {
+  /*when hovering an item:*/
+  background-color: #d4d4d4; 
+}
+
+li.localSearch .autocomplete-items div span.item-name {
+  display: block;
+  background-color: #e4e4e4;
+  font-weight: bold;
+  padding: 2px 5px;
+  border-bottom: 1px solid #d4d4d4;
+}
+
+li.localSearch .autocomplete-items div span.item-content {
+  display: block;
+  font-size: smaller;
+  color: #646464;
+  padding: 5px 5px 10px 10px;
+}
+
+li.localSearch .autocomplete-items div span.item-content strong {
+  color: darkblue;
+}
+
+li.localSearch #search_input_react {
+  height: 24px;
+}

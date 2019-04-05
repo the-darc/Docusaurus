@@ -146,6 +146,20 @@ class HeaderNav extends React.Component {
         </li>
       );
     }
+    if (link.search && this.props.config.localSearch) {
+      // return local search bar
+      const placeholder = this.props.config.localSearch.placeholder || 'Search';
+      return (
+        <li className="navSearchWrapper reactNavSearchWrapper localSearch" key="search">
+          <input
+            id="search_input_react"
+            type="text"
+            placeholder={placeholder}
+            title={placeholder}
+          />
+        </li>
+      );
+    }
     if (link.languages) {
       if (
         env.translation.enabled &&
@@ -277,7 +291,7 @@ class HeaderNav extends React.Component {
         search = true;
       }
     });
-    if (!search && this.props.config.algolia) {
+    if (!search && (this.props.config.algolia || this.props.config.localSearch)) {
       headerLinks.push({search: true});
     }
     return (
