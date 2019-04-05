@@ -377,6 +377,13 @@ function execute(port) {
     requestFile(`http://localhost:${port}${req.path}.html`, res, next);
   });
 
+  if (siteConfig.localSearch && siteConfig.localSearch.expressMiddleware) {
+    app.use(
+      `${siteConfig.baseUrl}query`,
+      siteConfig.localSearch.expressMiddleware(siteConfig),
+    );
+  }
+
   app.listen(port);
 }
 
