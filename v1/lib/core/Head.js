@@ -189,6 +189,8 @@ class Head extends React.Component {
           href={`${this.props.config.baseUrl}css/main.css`}
         />
         <script src={`${this.props.config.baseUrl}js/codetabs.js`} />
+        {this.props.config.localSearch && (<link rel="stylesheet" href={`${this.props.config.baseUrl}css/localSearch.css`} />)}
+        {this.props.config.localSearch && (<script src={`${this.props.config.baseUrl}js/localSearch.js`} />)}
       </head>
     );
   }

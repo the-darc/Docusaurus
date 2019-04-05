@@ -184,6 +184,18 @@ class Site extends React.Component {
                 }}
               />
             ))}
+          {this.props.config.localSearch && (
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  window.onload = function() {
+                    var customSearch = new CustomSearch('query?q=');
+                    customSearch.addAutoComplete(document.getElementById('search_input_react'));
+                  }
+                `,
+              }}
+            />
+          )}
 
           {process.env.NODE_ENV === 'development' &&
             liveReloadScriptUrl && <script src={liveReloadScriptUrl} />}
