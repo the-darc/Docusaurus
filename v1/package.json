@@ -1,5 +1,5 @@
 {
-  "name": "docusaurus",
+  "name": "@the-darc/docusaurus",
   "description": "Easy to Maintain Open Source Documentation Websites",
   "version": "1.7.2",
   "license": "MIT",
@@ -11,7 +11,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/facebook/Docusaurus.git"
+    "url": "https://github.com/the-darc/Docusaurus.git"
   },
   "scripts": {
     "prettier": "prettier --config ../.prettierrc --write \"**/*.js\"",
@@ -106,5 +106,15 @@
     "jest": "^23.6.0",
     "lint-staged": "^7.2.0",
     "rimraf": "^2.6.2"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/the-darc/Docusaurus/issues"
+  },
+  "homepage": "https://github.com/the-darc/Docusaurus#readme",
+  "main": ".eslintrc.js",
+  "directories": {
+    "example": "examples",
+    "lib": "lib"
+  },
+  "author": ""
 }
