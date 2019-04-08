@@ -16,7 +16,7 @@
 
 A fork of the original [`docusaurus` package](https://www.npmjs.com/package/docusaurus).
 
-This fork was created as a proposal of solution for the issue [Support local search #776](https://github.com/facebook/Docusaurus/issues/776).
+This fork was created as a solution proposal for the issue [Support local search #776](https://github.com/facebook/Docusaurus/issues/776).
 
 It's Not relly a **local** search solution since it's a server side search. But it allow the Docusaurus User to add your customized server search by implementing your own search engine an adding it as an Express Middleware.
 
@@ -26,6 +26,7 @@ This Fork is available as [`@the-darc/docusaurus` package](https://www.npmjs.com
 
 ```
 npm i @the-darc/docusaurus --save-dev
+npm i elasticlunr --save
 ```
 
 ## Usage
