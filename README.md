@@ -54,7 +54,7 @@ Add the localSearch config in your `siteConfig.js` like this:
 
 **File: <your-projeto>/local-search/index.js**
   
-```
+```js
 /**
  * Middleware express para processar uma requisição de pesquisa nos
  * documentos do Docusaurus.
@@ -89,7 +89,7 @@ function searchMiddleware(siteConfig) {
 
 **File: <your-projeto>/local-search/DocIndex.js**
 
-```
+```js
 const path = require('path');
 const SIDEBARS = require('../sidebars.json');
 const elasticlunr = require('elasticlunr');
