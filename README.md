@@ -26,7 +26,7 @@ This Fork is available as [`@the-darc/docusaurus` package](https://www.npmjs.com
 
 ```
 npm i @the-darc/docusaurus --save-dev
-npm i elasticlunr --save
+npm i elasticlunr remove-markdown --save
 ```
 
 ## Usage
