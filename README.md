@@ -14,62 +14,221 @@
 
 ## Introduction
 
-Docusaurus is a project for easily building, deploying, and maintaining open source project websites.
+A fork of the original [`docusaurus` package](https://www.npmjs.com/package/docusaurus).
 
-- **Simple to Start** Docusaurus is built to be easy to [get up and running](https://docusaurus.io/docs/en/installation.html) in as little time possible. We've built Docusaurus to handle the website build process so you can focus on your project.
-- **Localizable** Docusaurus ships with [localization support](https://docusaurus.io/docs/en/translation.html) via CrowdIn. Empower and grow your international community by translating your documentation.
-- **Customizable** While Docusaurus ships with the key pages and sections you need to get started, including a home page, a docs section, a [blog](https://docusaurus.io/docs/en/blog.html), and additional support pages, it is also [customizable](https://docusaurus.io/docs/en/custom-pages.html) as well to ensure you have a site that is [uniquely yours](https://docusaurus.io/docs/en/api-pages.html).
+This fork was created as a proposal of solution for the issue [Support local search #776](https://github.com/facebook/Docusaurus/issues/776).
+
+It's Not relly a **local** search solution since it's a server side search. But it allow the Docusaurus User to add your customized server search by implementing your own search engine an adding it as an Express Middleware.
 
 ## Installation
 
-Docusaurus is available as the [`docusaurus` package](https://www.npmjs.com/package/docusaurus) on [npm](https://www.npmjs.com).
+This Fork is available as [`@the-darc/docusaurus` package](https://www.npmjs.com/package/@the-darc/docusaurus) on [npm](https://www.npmjs.com).
 
-We have also released the [`docusaurus-init` package](https://www.npmjs.com/package/docusaurus-init) to make [getting started](https://docusaurus.io/docs/en/installation.html) with Docusaurus even easier.
+```
+npm i @the-darc/docusaurus --save-dev
+```
 
-## Contributing
+## Usage
 
-We've released Docusaurus because it helps us better scale and support the many OSS projects at Facebook. We hope that other organizations can benefit from the project. We are thankful for any contributions from the community.
+### siteConfig.js
 
-### [Code of Conduct](https://code.fb.com/codeofconduct)
+Add the localSearch config in your `siteConfig.js` like this:
 
-Facebook has adopted a Code of Conduct that we expect project participants to adhere to. Please read [the full text](https://code.fb.com/codeofconduct) so that you can understand what actions will and will not be tolerated.
+```js
+  localSearch: {
+    // Placeholder for the input-text
+    placeholder: 'Local Search',
+    // The express middleware that will resolver the end-point "/query?q=<search-string>"
+    expressMiddleware: require('./local-search'),
+    // Any customized configurations for your express middleware
+    resultSnippet: {
+      maxLength: 200,
+      preLength: 28,
+      posLength: 28
+    }
+  }
+```
 
-### Contributing Guide
+### Express Middleware Example
 
-Read our [contributing guide](https://github.com/facebook/Docusaurus/blob/master/CONTRIBUTING.md) to learn about our development process, how to propose bugfixes and improvements, and how to build and test your changes to Docusaurus.
+**File: <your-projeto>/local-search/index.js**
+  
+```
+/**
+ * Middleware express para processar uma requisição de pesquisa nos
+ * documentos do Docusaurus.
+ * 
+ * Processa uma requisição que recebem como QueryParameter o atributo q com 
+ * a string de pesquisa. E retorna como um JSON de resultados onde cada resultado
+ * segue a interface:
+ * {
+ *   id: <String com ID do documento no indice de pesquisa>,
+ *   score: <Number com o score do item para a pesquisa>,
+ *   name: <Nome do tópico de documentação encontrado>,
+ *   path: <Caminho do arquivo .md encontrado>,
+ *   snippet: <trecho do texto com o termo pesquisado>
+ * }
+ */
+var DocIndex = require('./DocIndex');
 
-### Beginner Friendly Bugs
+module.exports = searchMiddleware;
 
-To help you get your feet wet and get you familiar with our contribution process, we have a list of [beginner friendly bugs](https://github.com/facebook/Docusaurus/labels/good%20first%20issue) that contain bugs which are fairly easy to fix. This is a great place to get started.
+function searchMiddleware(siteConfig) {
+    const docIndex = new DocIndex(siteConfig);
 
-## Contact
+    return function searchMiddleware(req, res, next) {
+        let q = req.query.q;
+        if (!q) return res.status(404).send([]);
+    
+        var r = docIndex.search(q);
+        res.status(200).send(r);
+    };
+}
+```
 
-We have a few channels for contact:
+**File: <your-projeto>/local-search/DocIndex.js**
 
-- [Discord](https://discord.gg/docusaurus) with two text channels:
-  - `#docusaurus-users` for those using Docusaurus.
-  - `#docusaurus-dev` for those wanting to contribute to the Docusaurus core.
-- [@docusaurus](https://twitter.com/docusaurus) on Twitter
-- [GitHub Issues](https://github.com/facebook/docusaurus/issues)
+```
+const path = require('path');
+const SIDEBARS = require('../sidebars.json');
+const elasticlunr = require('elasticlunr');
+const removeMd = require('remove-markdown');
+const fs = require('fs');
 
-## Contributors
+function extractTopicTitle(content, defaultTitle) {
+    let tmp = /title\:(.*)/ig.exec(content);
+    return tmp ? tmp[1].trim() : defaultTitle;
+}
 
-This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)]. <a href="https://github.com/facebook/Docusaurus/graphs/contributors"><img src="https://opencollective.com/Docusaurus/contributors.svg?width=890&button=false" /></a>
+function escapeRegExp(text) {
+    return text.replace(/[-[\]{}()*+?.,\\/^$|#\s]/g, '\\$&');
+}
 
-## Backers
+class DocIndex {
+    constructor(siteConfig) {
+        this.resultSnippet = (siteConfig.localSearch || {}).resultSnippet || {};
+        this.resultSnippet.maxLength = this.resultSnippet.maxLength || 200;
+        this.resultSnippet.preLength = this.resultSnippet.preLength || 28;
+        this.resultSnippet.posLength = this.resultSnippet.posLength || 28;
 
-Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/Docusaurus#backer)]
+        this.docsPath = siteConfig.customDocsPath ? siteConfig.customDocsPath : 'docs';
 
-<a href="https://opencollective.com/Docusaurus#backers" target="_blank"><img src="https://opencollective.com/Docusaurus/backers.svg?width=890"></a>
+        let documents = this._loadDocuments();
+        this._index = this._createIndex(documents);
 
-## Sponsors
+    }
 
-Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://opencollective.com/Docusaurus#sponsor)]
+    _loadDocuments() {
+        var documents = [];
+        Object.keys(SIDEBARS).forEach(function(helpKey) {
+            var help = SIDEBARS[helpKey];
+            Object.keys(help).forEach(function(sectionName) {
+                var section = help[sectionName];
+                section.forEach(function(topicPath) {
+                    let fullPath = '../docs/' + topicPath + '.md';
+                    try {
+                        let content = fs.readFileSync(fullPath, 'utf8');
+                        let title = extractTopicTitle(content);
+                        let topicName = sectionName + ' > ' + title;
+                        documents.push({
+                            name: topicName,
+                            topicPath: topicPath,
+                            content: removeMd(content, {useImgAltText: false}).replace(/ \|/g, '')
+                        });
+                    } catch (e) {
+                        if (e && e.code === 'ENOENT') {
+                            console.warn('[WARN] File not found: "' + fullPath + '"');
+                        } else {
+                            console.error('[ERROR] Unexpected error reading file contents for indexing: "' + fullPath + '"');
+                            throw e;
+                        }
+                    }
+                });
+            });
+        });
+        return documents;
+    }
 
-<a href="https://opencollective.com/Docusaurus/sponsor/0/website" target="_blank"><img src="https://opencollective.com/Docusaurus/sponsor/0/avatar.svg"></a> <a href="https://opencollective.com/Docusaurus/sponsor/1/website" target="_blank"><img src="https://opencollective.com/Docusaurus/sponsor/1/avatar.svg"></a>
+    _createIndex(documents) {
+        var index = elasticlunr(function () {
+            this.setRef('id');
+            this.addField('content');
+            // this.saveDocument(false);
+        });
+    
+        documents.forEach(function (doc, id) {
+            doc.id = id;
+            index.addDoc(doc);
+        });
 
-## License
+        console.log('Index created. Used ' + Math.round(JSON.stringify(index).length/1024) + 'Kb');
+        return index;
+    }
 
-Docusaurus is [MIT licensed](./LICENSE).
+    _parseResults(query, results) {
+        var parsed = [];
+        (results || []).forEach((result) => {
+            var regex = new RegExp('.{0,'+this.resultSnippet.preLength+'}'+escapeRegExp(query)+'.{0,'+this.resultSnippet.posLength+'}', 'ig');
+            var doc = this._index.documentStore.docs[result.ref];
+            if (doc) {
+                var snippets = [];
+                var snippet = (regex.exec(doc.content) || [])[0];
+                var totalLength = 0;
+                while (snippet && totalLength < this.resultSnippet.maxLength) {
+                    if (snippet.toUpperCase().indexOf(query.toUpperCase()) >= this.resultSnippet.preLength) {
+                        // Remove a primeira palavra dado que ela potencialmente é uma palavra cortada
+                        snippet = snippet.replace(/[^ ]*/, '');
+                    }
+                    if ( (snippet.length - snippet.toUpperCase().indexOf(query.toUpperCase())) >= this.resultSnippet.posLength) {
+                        // Remove a última palavra dado que ela potencialmente é uma palavra cortada
+                        snippet = snippet.replace(/[^ ]*$/, '');
+                    }
+                    totalLength += snippet.length;
+                    snippets.push(snippet.trim());
+                    snippet = (regex.exec(doc.content) || [])[0];
+                }
+                snippets = snippets.join(' (...) ');
+                parsed.push({
+                    id: result.ref,
+                    score: result.score,
+                    name: doc.name,
+                    path: path.join(this.docsPath, doc.topicPath),
+                    snippet: snippets
+                });
+            }
+        });
+        return parsed;
+    }
 
-The Docusaurus documentation (e.g., `.md` files in the `/docs` folder) is [Creative Commons licensed](./LICENSE-docs).
+    search(query) {
+        var results = this._index.search(query, {});
+        return this._parseResults(query, results);
+    }
+
+    saveIndex(fileUri) {
+        fs.writeFile(fileUri || './index.json' , JSON.stringify(this._index), function (err) {
+            if (err) throw err;
+            console.log('index saved in index.json');
+        });
+    }
+}
+
+module.exports = DocIndex;
+
+// --- test ---------------------------------------------------------
+/*
+var docIndex = new DocIndex({
+    resultSnippet: {
+        maxLength: 200,
+        preLength: 28,
+        posLength: 28
+    }
+});
+
+console.log(JSON.stringify({
+    result: docIndex.search('sydle')
+}, null, 4));
+*/
+```
+
+
