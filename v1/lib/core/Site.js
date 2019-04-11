@@ -188,10 +188,10 @@ class Site extends React.Component {
             <script
               dangerouslySetInnerHTML={{
                 __html: `
-                  window.onload = function() {
+                  window.addEventListener('load', function() {
                     var customSearch = new CustomSearch('query?q=');
                     customSearch.addAutoComplete(document.getElementById('search_input_react'));
-                  }
+                  });
                 `,
               }}
             />
